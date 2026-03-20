@@ -22,10 +22,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# 6단계: 소스 복사 및 권한 설정
+# 6단계: 소스 복사 및 권한 설정 보강
 COPY . .
-# [핵심] temp_storage 생성 및 appuser에게 소유권 부여
-RUN mkdir -p /app/temp_storage && chown -R appuser:appuser /app
+# [핵심] temp_storage 생성 및 appuser에게 소유권 부여 (k3s 볼륨 마운트 대비)
+RUN mkdir -p /app/temp_storage && \
+    chown -R appuser:appuser /app && \
+    chmod -R 755 /app/temp_storage
 
 USER appuser
 

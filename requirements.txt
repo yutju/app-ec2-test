@@ -4,3 +4,4 @@ python-multipart
 olefile
 reportlab
 Pillow
+python-docx  # <--- 워드(DOCX) 지원용 추가
