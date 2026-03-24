@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-python-multipart
-Pillow
-boto3
-PyPDF2==3.0.1  # PDF 병합용 추가 🎖️
-img2pdf==0.5.1  # 이미지 -> PDF 변환 최적화용 추가 🎖️
