@@ -5,7 +5,7 @@ FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV LANG=ko_KR.UTF-8
-# K3s 파드 내부 로그 시간대를 한국 시간으로 맞추기 위해 필수
+# K3s 파드 및 EC2 컨테이너 내부 로그 시간대를 한국 시간으로 맞추기 위해 필수
 ENV TZ=Asia/Seoul
 
 # 3단계: 시스템 패키지 설치
@@ -33,13 +33,18 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # COPY 시점에 소유권을 appuser로 지정하여 레이어 용량을 최적화합니다.
 COPY --chown=appuser:appgroup . .
 
-# [핵심 수정] temp_storage 폴더 생성 및 소유권/권한 설정 🎖️
-# USER 전환 전에 실행해야 root 권한으로 폴더를 만들고 소유권을 넘길 수 있습니다.
+# [핵심 수정] 권한 설정 로직 통합 🎖️
+# 1. temp_storage 폴더 생성
+# 2. app.log 빈 파일 생성 (Permission Denied 방지)
+# 3. 모든 작업 파일에 대해 appuser에게 소유권 부여
 RUN mkdir -p /app/temp_storage && \
-    chown -R appuser:appgroup /app/temp_storage && \
-    chmod 755 /app/temp_storage
+    touch /app/app.log && \
+    chown -R appuser:appgroup /app/temp_storage /app/app.log && \
+    chmod 755 /app/temp_storage && \
+    chmod 664 /app/app.log
 
 # 7단계: 컨테이너 실행 유저 전환 (보안 강화)
+# 이제부터 실행되는 모든 프로세스는 일반 사용자(appuser) 권한입니다.
 USER appuser
 
 # 8단계: 애플리케이션 실행

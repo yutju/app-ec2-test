@@ -37,12 +37,12 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # --- [복구된 기능] Prometheus 메트릭 설정 ---
 CONVERSION_REQUESTS = Counter(
-    'doc_conversion_requests_total', 
-    'Total document conversion requests', 
-    ['status', 'file_type'] 
+    'doc_conversion_requests_total',
+    'Total document conversion requests',
+    ['status', 'file_type']
 )
 CONVERSION_DURATION = Histogram(
-    'doc_conversion_duration_seconds', 
+    'doc_conversion_duration_seconds',
     'Document conversion processing time',
     ['file_type']
 )
@@ -87,7 +87,7 @@ async def convert_any_to_pdf(request: Request, background_tasks: BackgroundTasks
     file.file.seek(0, os.SEEK_END)
     file_size = file.file.tell()
     file.file.seek(0)
-    
+
     ext = file.filename.split(".")[-1].lower()
 
     if file_size > MAX_SIZE:
@@ -149,9 +149,10 @@ async def convert_any_to_pdf(request: Request, background_tasks: BackgroundTasks
         # [복구된 기능] 실패 메트릭 기록
         CONVERSION_REQUESTS.labels(status='failed', file_type=ext).inc()
         logger.error(f"Conversion failed for {file.filename}: {str(e)}")
-        
+
         # 에러 발생 시 생성된 파일들 정리
         cleanup_local_files(input_path, output_path)
-        
+
         status_code = 504 if isinstance(e, TimeoutError) else 500
         raise HTTPException(status_code=status_code, detail=f"변환 실패: {str(e)}")
+

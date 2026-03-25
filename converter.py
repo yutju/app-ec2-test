@@ -16,17 +16,17 @@ logger = logging.getLogger("SixSense-Converter")
 
 def process_conversion(input_path, output_path, ext, temp_dir):
     font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
-    
+
     # 폰트가 없을 경우 에러 방지
     if not os.path.exists(font_path):
         raise FileNotFoundError(f"폰트 파일을 찾을 수 없습니다: {font_path}")
-        
+
     pdfmetrics.registerFont(TTFont("NanumGothic", font_path))
 
     # [1] 이미지 변환
     if ext in ["png", "jpg", "jpeg", "bmp"]:
         with Image.open(input_path) as img:
-            if img.mode != "RGB": 
+            if img.mode != "RGB":
                 img = img.convert("RGB")
             img.save(output_path, "PDF")
         return
@@ -70,7 +70,7 @@ def process_conversion(input_path, output_path, ext, temp_dir):
             # --- [핵심 수정: PDF 자동 줄바꿈 및 여백 자동 생성 로직] ---
             doc = SimpleDocTemplate(output_path, pagesize=A4)
             styles = getSampleStyleSheet()
-            
+
             # 커스텀 폰트 스타일 지정 (한글 깨짐 방지 및 아시아권 줄바꿈 지원)
             custom_style = ParagraphStyle(
                 name='NanumStyle',
@@ -81,7 +81,7 @@ def process_conversion(input_path, output_path, ext, temp_dir):
             )
 
             story = [] # PDF에 들어갈 내용물(문단들)을 담는 리스트
-            
+
             for line in lines:
                 clean_line = line.strip()
                 if clean_line:
@@ -99,3 +99,4 @@ def process_conversion(input_path, output_path, ext, temp_dir):
 
     else:
         raise ValueError(f"지원하지 않는 형식입니다: {ext}")
+
